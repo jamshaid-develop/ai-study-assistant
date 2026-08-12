@@ -131,6 +131,10 @@ GROQ_API_KEY=your_groq_api_key_here
 streamlit run app.py
 ```
 
+[live demo]( https://ai-study-assistant-hmgraax38smpkqegn6fvsb.streamlit.app/)
+
+
+
 ---
 
 ## 📁 Project Structure
