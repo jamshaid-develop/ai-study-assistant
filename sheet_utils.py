@@ -26,18 +26,28 @@ STATUS_STARTED = "In Progress"
 def get_worksheet():
     """
     Authenticates with the Service Account and returns the first worksheet
-    of the configured Sheet. Raises a clear error if setup is missing.
+    of the configured Sheet. Works both locally (service_account.json file)
+    and on Streamlit Cloud (st.secrets["gcp_service_account"]).
     """
-    creds_path = os.environ.get("GOOGLE_SERVICE_ACCOUNT_FILE", "service_account.json")
     sheet_name = os.environ.get("STUDY_PLANNER_SHEET_NAME", "StudyPlannerData")
 
-    if not os.path.exists(creds_path):
-        raise FileNotFoundError(
-            f"Service account file not found at '{creds_path}'. "
-            "See README.md for setup steps."
-        )
+    try:
+        import streamlit as st
+        if "gcp_service_account" in st.secrets:
+            creds_dict = dict(st.secrets["gcp_service_account"])
+            creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+        else:
+            raise KeyError
+    except Exception:
+        creds_path = os.environ.get("GOOGLE_SERVICE_ACCOUNT_FILE", "service_account.json")
+        if not os.path.exists(creds_path):
+            raise FileNotFoundError(
+                f"Service account file not found at '{creds_path}', and no "
+                "st.secrets['gcp_service_account'] configured either. "
+                "See README.md for setup steps."
+            )
+        creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)
 
-    creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)
     client = gspread.authorize(creds)
 
     sheet = client.open(sheet_name).sheet1
