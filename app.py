@@ -20,7 +20,7 @@ from sheet_utils import (
     get_timetable_by_email, save_subject, mark_started, delete_subject,
     reset_status_to_pending, STATUS_STARTED,
 )
-from timer_utils import get_session_state, color_badge_html, alert_sound_html
+from timer_utils import get_session_state, color_badge_html, alert_sound_html, now_local
 
 load_dotenv()
 
@@ -241,7 +241,7 @@ elif page == "🗓️ Study Planner":
 
         col_a, col_b = st.columns([4, 1])
         with col_a:
-            today_str = __import__('datetime').datetime.now().strftime('%A, %d %B %Y')
+            today_str = now_local().strftime('%A, %d %B %Y')
             if rows:
                 st.success(f"Hi **{st.session_state.planner_name}** — here's your study plan.  \n📅 {today_str}")
             else:
@@ -255,7 +255,7 @@ elif page == "🗓️ Study Planner":
                 st.session_state.planner_email = None
                 st.session_state.planner_rows = []
                 st.rerun()
-            st.caption(f"⏱ {__import__('datetime').datetime.now().strftime('%I:%M %p')}")
+            st.caption(f"⏱ {now_local().strftime('%I:%M %p')}")
 
         # ---- Auto-reset: once a session's end time has passed, its Status snaps back
         #      to Pending in the Sheet — so nothing stays stale as "In Progress"/"late"

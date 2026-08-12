@@ -17,6 +17,17 @@ Session lifecycle (per subject, each day):
 """
 
 from datetime import datetime, time as dt_time, timedelta
+from zoneinfo import ZoneInfo
+
+# Locked to Pakistan Time regardless of the server's own timezone — Streamlit
+# Cloud servers run in UTC, so relying on the server's local clock would put
+# every calculation ~5 hours off once deployed. All "now" values in this
+# module go through this function instead of a bare datetime.now().
+LOCAL_TZ = ZoneInfo("Asia/Karachi")
+
+
+def now_local() -> datetime:
+    return datetime.now(LOCAL_TZ)
 
 LATE_GRACE_MINUTES = 5      # how long after start a "Pending" session gets a blue grace period before going red
 UPCOMING_WINDOW_MINUTES = 5  # how close to start time the "upcoming" badge turns blue
@@ -72,17 +83,17 @@ def get_session_state(time_slot: str, status: str = "Pending", now: datetime | N
                  and the stored Status isn't already Pending)
       }
     """
-    now = now or datetime.now()
+    now = now or now_local()
     parsed = parse_time_range(time_slot)
 
     if parsed is None:
         return {"color": "unknown", "label": "Time format not recognized", "phase": "unknown", "ended": False}
 
     start_time, end_time = parsed
-    start_dt = datetime.combine(now.date(), start_time)
+    start_dt = datetime.combine(now.date(), start_time, tzinfo=LOCAL_TZ)
 
     if end_time is not None:
-        end_dt = datetime.combine(now.date(), end_time)
+        end_dt = datetime.combine(now.date(), end_time, tzinfo=LOCAL_TZ)
         if end_dt <= start_dt:  # overnight session, e.g. 11:55 PM - 12:30 AM
             end_dt += timedelta(days=1)
     else:
