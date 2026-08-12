@@ -1,0 +1,14 @@
+streamlit
+langchain
+langchain-text-splitters
+langchain-community
+langchain-huggingface
+langchain-groq
+faiss-cpu
+pypdf
+docx2txt
+sentence-transformers
+python-dotenv
+gspread
+google-auth
+streamlit-autorefresh
